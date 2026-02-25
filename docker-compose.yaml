@@ -1,3 +1,4 @@
+
 services:
   proxy:
     image: nginx:1.29
@@ -7,26 +8,33 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - tugas1docker
+
+  db:
+    image: mariadb:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - tugas1docker
+
   wp:
     image: wordpress
+    depends_on:
+      - db
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: ${DB_USER}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
       WORDPRESS_DB_NAME: ${DB_NAME}
     volumes:
-      - wordpress:/var/www/html
+      - wp-data:/var/www/html
     networks:
       - tugas1docker
-  db:
-    image: mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=${ROOT}
-      - MYSQL_DATABASE=${DB_NAME}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
-    networks:
-      - tugas1docker
+  
   pma:
     image: phpmyadmin
     environment:
@@ -34,7 +42,7 @@ services:
     networks:
       - tugas1docker
 volumes:
-  wordpress:
+  db-data:
+  wp-data:
 networks:
   tugas1docker:
-    driver: bridge
